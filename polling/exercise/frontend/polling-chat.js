@@ -19,16 +19,18 @@ async function postNewMsg(user, text) {
     user,
     text,
   };
-  allChat.push(data);
+  allChat.unshift(data);
 
   const options = {
-    headers: { "Content-Type": "application/json; charset=utf-8" },
     method: "POST",
-    body: data,
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
   };
 
   try {
-    await fetch("/poll");
+    await fetch("/poll", options);
   } catch (error) {
     console.error(error);
     allChat.pop();
@@ -38,15 +40,15 @@ async function postNewMsg(user, text) {
 }
 
 async function getNewMsgs() {
+  let json;
   try {
-    const res = await fetch("/poll", {
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      method: "GET",
-    });
-    allChat = await res.json();
-  } catch (error) {
-    console.error(error);
+    const res = await fetch("/poll");
+    json = await res.json();
+  } catch (e) {
+    // back off
+    console.error("polling error", e);
   }
+  allChat = json.msg;
   render();
 }
 

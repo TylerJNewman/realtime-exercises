@@ -21,14 +21,15 @@ app.use(bodyParser.json());
 app.use(express.static("frontend"));
 
 app.get("/poll", function (req, res) {
-  const messages = getMsgs();
-  res.send(messages);
+  res.send({ msg: getMsgs() });
 });
 
 app.post("/poll", function (req, res) {
+  console.log(req.body);
   const { user, text } = req.body;
   msg.push({ user, text, time: Date.now() });
-  res.send(message);
+  console.log(msg);
+  res.send({ msg: getMsgs() });
 });
 
 // start the server
