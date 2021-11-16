@@ -65,22 +65,11 @@ const template = (user, msg) =>
 
 let timeToMakeNextRequest = 0;
 let start = Date.now();
-let prevSecond = 0;
 const rafTimer = async () => {
   const elapsedMilliseconds = Date.now() - start;
-  const seconds = Math.floor(elapsedMilliseconds / 1000);
-  if (seconds > prevSecond) {
-    console.log(
-      `Counting: seconds elapsed = ${Math.floor(elapsedMilliseconds / 1000)}`
-    );
-    prevSecond = seconds;
-  }
   if (timeToMakeNextRequest <= elapsedMilliseconds) {
     await getNewMsgs();
     timeToMakeNextRequest = elapsedMilliseconds + INTERVAL;
-    console.log(
-      `Polling:seconds elapsed = ${Math.floor(elapsedMilliseconds / 1000)}`
-    );
   }
   requestAnimationFrame(rafTimer);
 };
