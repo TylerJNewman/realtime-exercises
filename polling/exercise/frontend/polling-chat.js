@@ -15,13 +15,39 @@ chat.addEventListener("submit", function (e) {
 });
 
 async function postNewMsg(user, text) {
-  // post to /poll a new message
-  // write code here
+  const data = {
+    user,
+    text,
+  };
+  allChat.push(data);
+
+  const options = {
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    method: "POST",
+    body: data,
+  };
+
+  try {
+    await fetch("/poll");
+  } catch (error) {
+    console.error(error);
+    allChat.pop();
+  }
+
+  render();
 }
 
 async function getNewMsgs() {
-  // poll the server
-  // write code here
+  try {
+    const res = await fetch("/poll", {
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      method: "GET",
+    });
+    allChat = await res.json();
+  } catch (error) {
+    console.error(error);
+  }
+  render();
 }
 
 function render() {
@@ -37,5 +63,26 @@ function render() {
 const template = (user, msg) =>
   `<li class="collection-item"><span class="badge">${user}</span>${msg}</li>`;
 
-// make the first request
-getNewMsgs();
+let timeToMakeNextRequest = 0;
+let start = Date.now();
+let prevSecond = 0;
+const rafTimer = async () => {
+  const elapsedMilliseconds = Date.now() - start;
+  const seconds = Math.floor(elapsedMilliseconds / 1000);
+  if (seconds > prevSecond) {
+    console.log(
+      `Counting: seconds elapsed = ${Math.floor(elapsedMilliseconds / 1000)}`
+    );
+    prevSecond = seconds;
+  }
+  if (timeToMakeNextRequest <= elapsedMilliseconds) {
+    await getNewMsgs();
+    timeToMakeNextRequest = elapsedMilliseconds + INTERVAL;
+    console.log(
+      `Polling:seconds elapsed = ${Math.floor(elapsedMilliseconds / 1000)}`
+    );
+  }
+  requestAnimationFrame(rafTimer);
+};
+
+requestAnimationFrame(rafTimer);
